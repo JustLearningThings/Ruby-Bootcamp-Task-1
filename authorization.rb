@@ -17,6 +17,9 @@ class SpotifyAuthorization
         
         @URL = "https://accounts.spotify.com/authorize?client_id=#{@CLIENT_ID}&response_type=#{@RESPONSE_TYPE}&redirect_uri=#{@REDIRECT_URI}"
         @TOKEN_URL = 'https://accounts.spotify.com/api/token'
+
+        @access_token = false
+        @refresh_token = false
     end
 
     # Reutrns authorization code
@@ -69,15 +72,20 @@ class SpotifyAuthorization
             return false, false
         else
             body = JSON.parse(response.body)
-            access_token = body['access_token']
-            refresh_token = body['refresh_token']
+            @access_token = body['access_token']
+            @refresh_token = body['refresh_token']
         end
 
-        return access_token, refresh_token
+        return @access_token, @refresh_token
     end
 
     # helper function to check if request_tokens returned actual tokens instead of false, false
     def check_tokens(t1, t2)
-        t1 and t2 ? true : false
+        @access_token and @refresh_token ? true : false
+    end
+
+    # helper function for adding Authorization header to a headers hash
+    def add_authorization_header(headers)
+        headers['Authorization'] = "Bearer #{@access_token}"
     end
 end
