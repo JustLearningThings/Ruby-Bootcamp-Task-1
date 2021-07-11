@@ -78,7 +78,7 @@ class Spotify
 
     # returns the id of the nth track from the playlist
     def get_nth_track_from_playlist(n, playlist_id, auth)
-        # adding headers
+        # constructing the request body and adding headers
 
         headers = { content_type: 'application/json' }
         auth.add_authorization_header(headers)

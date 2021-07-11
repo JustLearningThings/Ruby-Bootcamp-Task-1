@@ -7,6 +7,9 @@ require 'cgi'
 require_relative './authorization'
 require_relative './spotify'
 
+require_relative './Playlist'
+require_relative './Track'
+
 
 client_id = 'c40a305bf91f49e6a53c9256dead2be0'
 client_secret = '3897ea5cb4fb4b358281c7e65aed4da7'
@@ -47,3 +50,8 @@ snapshot_id = api.reorder_track(0, 3, playlist_id, snapshot_id, auth)
 last_track = api.get_nth_track_from_playlist(-1, playlist_id, auth)
 
 snapshot_id = api.remove_track_from_playlist(playlist_id, snapshot_id, auth, last_track) if last_track
+
+# Instanciating a Playlist
+playlist = Playlist.new(playlist_id, auth)
+playlist.info
+puts playlist.json
