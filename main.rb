@@ -40,3 +40,5 @@ snapshot_id = api.add_track_to_playlist(playlist_id, auth,
 )
 
 # Place the first track at the end of the playlist
+
+snapshot_id = api.reorder_track(0, 3, playlist_id, snapshot_id, auth)

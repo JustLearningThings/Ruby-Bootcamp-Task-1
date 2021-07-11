@@ -25,7 +25,7 @@ class Spotify
 
     # searches for a track by its name and returns its id
     def get_track_id(name, auth)
-        # constructing the request body and adding headers
+        # adding headers
 
         headers = { content_type: 'application/json' }
         auth.add_authorization_header(headers)
@@ -55,6 +55,22 @@ class Spotify
         url = "https://api.spotify.com/v1/playlists/#{playlist_id}/tracks"
 
         response = RestClient.post url, body, headers
+        
+        response = JSON.parse(response)
+        response['snapshot_id']
+    end
+
+    def reorder_track(range_start, insert_before, playlist_id, snapshot_id, auth)
+        # constructing the request body and adding headers
+
+        body = { range_start: range_start, insert_before: insert_before }.to_json
+
+        headers = { content_type: 'application/json' }
+        auth.add_authorization_header(headers)
+
+        url = "https://api.spotify.com/v1/playlists/#{playlist_id}/tracks"
+
+        response = RestClient.put url, body, headers
         
         response = JSON.parse(response)
         response['snapshot_id']
