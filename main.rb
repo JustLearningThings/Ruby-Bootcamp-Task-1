@@ -42,3 +42,8 @@ snapshot_id = api.add_track_to_playlist(playlist_id, auth,
 # Place the first track at the end of the playlist
 
 snapshot_id = api.reorder_track(0, 3, playlist_id, snapshot_id, auth)
+
+# Delete the last track
+last_track = api.get_nth_track_from_playlist(-1, playlist_id, auth)
+
+snapshot_id = api.remove_track_from_playlist(playlist_id, snapshot_id, auth, last_track) if last_track

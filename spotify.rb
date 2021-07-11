@@ -43,11 +43,11 @@ class Spotify
     end
 
     # returns the playlist's new snapshot id
-    def add_track_to_playlist(playlist_id, auth, *items)
+    def add_track_to_playlist(playlist_id, auth, *tracks)
         # constructing the request body and adding headers
 
-        items.map! { |uri| uri.prepend("spotify:track:") }
-        body = { uris: items }.to_json
+        tracks.map! { |uri| uri.prepend("spotify:track:") }
+        body = { uris: tracks }.to_json
 
         headers = { content_type: 'application/json' }
         auth.add_authorization_header(headers)
@@ -71,6 +71,46 @@ class Spotify
         url = "https://api.spotify.com/v1/playlists/#{playlist_id}/tracks"
 
         response = RestClient.put url, body, headers
+        
+        response = JSON.parse(response)
+        response['snapshot_id']
+    end
+
+    # returns the id of the nth track from the playlist
+    def get_nth_track_from_playlist(n, playlist_id, auth)
+        # adding headers
+
+        headers = { content_type: 'application/json' }
+        auth.add_authorization_header(headers)
+
+        url = "https://api.spotify.com/v1/playlists/#{playlist_id}/tracks?market=from_token"
+
+        response = RestClient.get url, headers
+        response = JSON.parse(response)
+
+        items = response['items']
+        
+        return false if items.length() == 0 or n >= items.length()
+
+        n = items.length() - 1 if n < 0
+
+        items[n]['track']['id']
+    end
+
+    def remove_track_from_playlist(playlist_id, snapshot_id, auth, *tracks)
+        # constructing the request body and adding headers
+
+        tracks.map! { |uri| uri.prepend("spotify:track:") }
+        tracks.map! { |uri| uri = { "uri": uri } }
+        body = { tracks: tracks }.to_json
+
+        headers = { content_type: 'application/json' }
+        auth.add_authorization_header(headers)
+
+        url = "https://api.spotify.com/v1/playlists/#{playlist_id}/tracks"
+
+        # Restclient's delete method doesn't accept a payload, so we add it with execute
+        response = RestClient::Request.execute(method: :delete, url: url, payload: body, headers: headers)
         
         response = JSON.parse(response)
         response['snapshot_id']
