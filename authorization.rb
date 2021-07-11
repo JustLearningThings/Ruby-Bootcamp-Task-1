@@ -10,12 +10,13 @@ class SpotifyAuthorization
         @CLIENT_ID = client_id
         @CLIENT_SECRET = client_secret # Normally kept in an environment variable for security reason !
         @REDIRECT_URI = redirect_uri
+        @USERNAME = username
+        @PASSWORD = password
 
-        @USERNAME = 'ildedgd6c4eslo2v78c0e9prg'
-        @PASSWORD = 'ruby_task_1'
+        @SCOPES = 'playlist-modify-public'
         @RESPONSE_TYPE = 'code'
         
-        @URL = "https://accounts.spotify.com/authorize?client_id=#{@CLIENT_ID}&response_type=#{@RESPONSE_TYPE}&redirect_uri=#{@REDIRECT_URI}"
+        @URL = "https://accounts.spotify.com/authorize?client_id=#{@CLIENT_ID}&response_type=#{@RESPONSE_TYPE}&scope=#{@SCOPES}&redirect_uri=#{@REDIRECT_URI}"
         @TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
         @access_token = false
@@ -26,25 +27,37 @@ class SpotifyAuthorization
     def request_spotify_authorization()
         # starting Watir
 
-        # Watir.default_timeout = 180
+        Watir.default_timeout = 256
         browser = Watir::Browser.start @URL
 
         # writing to the form
 
-        username_input = browser.text_field(id: 'login-username')
-        password_input = browser.text_field(id: 'login-password')
-
-        username_input.set @USERNAME
-        password_input.set @PASSWORD
+        browser.text_field(id: 'login-username').set @USERNAME
+        browser.text_field(id: 'login-password').set @PASSWORD
 
         # submitting the form and granting permissions
 
         browser.button(id: 'login-button').click
-        browser.button(id: 'auth-accept').click
 
-        # grabbing the authorization code for the next step of authorization
+        permission_btn = browser.button(id: 'auth-accept')
+
+        # in case spotify asks for permissions
+        if permission_btn.exists?
+            permission_btn.click
+
+            # grabbing the authorization code for the next step of authorization
+            response_query = CGI.parse(URI.parse(browser.url).query)
+
+            return response_query['code'][0] # the authorization code
+        end
+        
+        # otherwise, spotify returns a 'continue' link where we should go to get the code
+
         response_query = CGI.parse(URI.parse(browser.url).query)
-        code = response_query['code'][0] # the authorization code
+        continue_url = response_query["continue"][0]
+        browser.goto continue_url
+        url_with_code = CGI.parse(URI.parse(browser.url).query)
+        code = url_with_code['code'][0] # the authorization code
 
         # closing the browser and returning the authorization code
 
