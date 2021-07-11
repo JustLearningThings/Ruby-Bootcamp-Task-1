@@ -60,7 +60,7 @@ class Playlist
 
         # format tracks and add them to the hash
 
-        ts = tracks.map { |track|
+        ts = @tracks.map { |track|
             track = {
                 name: track.name,
                 artist_name: track.artist_name,
